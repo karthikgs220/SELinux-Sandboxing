@@ -22,12 +22,19 @@ The demo video demonstrates:
 6. how the sandboxed server is restricted to operating only on port 8001
 
 #============= steps to build/install the policy =======================
+
 #1. Login as root
+
 #2. navigate to /home/student/confined
-#3. Run command - make -f /usr/share/selinux/devel/Makefile ca645_server.pp (Assuming the name of type enforcement(.te) file is ca645_server.te)
-#4. Run command - semodule -i ca645_server.pp
-#5. Run script  - context_port_commands.sh (Changes the context of files in the confined directory, and makes sure that ca645_server can only bind to port 8001)
+
+#3. Run command - make -f /usr/share/selinux/devel/Makefile server_policy.pp (Assuming the name of type enforcement(.te) file is server_policy.te)
+
+#4. Run command - semodule -i server_policy.pp
+
+#5. Run script  - context_port_commands.sh (Changes the context of files in the confined directory, and makes sure that server can only bind to port 8001)
+
 #6. Run command - make -f /usr/share/selinux/devel/Makefile load
+
 #7. Exit root and test
 
 
