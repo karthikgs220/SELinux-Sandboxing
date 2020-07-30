@@ -1,0 +1,69 @@
+#============= steps to build/install the policy =======================
+#1. Login as root
+#2. navigate to /home/student/confined
+#3. Run command - make -f /usr/share/selinux/devel/Makefile ca645_server.pp (Assuming the name of type enforcement(.te) file is ca645_server.te)
+#4. Run command - semodule -i ca645_server.pp
+#5. Run script  - context_port_commands.sh (Changes the context of files in the confined directory, and makes sure that ca645_server can only bind to port 8001)
+#6. Run command - make -f /usr/share/selinux/devel/Makefile load
+#7. Exit root and test
+
+policy_module(ca645_server,1.0)
+
+require {
+        type unconfined_t;
+	type net_conf_t;
+	type user_devpts_t;
+	type node_t;
+	type bin_t;
+	type passwd_file_t;
+        role unconfined_r;
+}
+
+type ca645_server_t;
+type ca645_server_exec_t;
+type ca645_server_port_t;
+corenet_port(ca645_server_port_t);
+domain_type(ca645_server_t)
+application_domain(ca645_server_t, ca645_server_exec_t)
+
+#============= roles =======================
+role unconfined_r types ca645_server_t;
+
+#============= transitions =================
+domain_auto_transition_pattern(unconfined_t, ca645_server_exec_t, ca645_server_t)
+
+#============= unconfined_t ================
+allow unconfined_t ca645_server_t:file { execute relabelfrom };
+
+#============= ca645_server_t ==============
+allow ca645_server_t passwd_file_t:file getattr;
+allow ca645_server_t passwd_file_t:file { open read };
+
+allow ca645_server_t bin_t:file execute;
+
+allow ca645_server_t net_conf_t:file getattr;
+allow ca645_server_t net_conf_t:file read;
+allow ca645_server_t net_conf_t:file open;
+allow ca645_server_t net_conf_t:lnk_file read;
+
+allow ca645_server_t node_t:tcp_socket node_bind;
+
+allow ca645_server_t self:process setpgid;
+allow ca645_server_t self:tcp_socket connect;
+allow ca645_server_t self:tcp_socket listen;
+allow ca645_server_t self:tcp_socket accept;
+allow ca645_server_t self:tcp_socket setopt;
+allow ca645_server_t self:tcp_socket bind;
+allow ca645_server_t self:tcp_socket create;
+allow ca645_server_t self:udp_socket create;
+allow ca645_server_t self:udp_socket connect;
+allow ca645_server_t self:tcp_socket { read write };
+
+allow ca645_server_t user_devpts_t:chr_file ioctl;
+allow ca645_server_t user_devpts_t:chr_file getattr;
+allow ca645_server_t user_devpts_t:chr_file { read write };
+allow ca645_server_t user_devpts_t:chr_file append;
+
+#============= ca645_server_port_t =========
+allow ca645_server_t ca645_server_port_t:tcp_socket name_connect;
+allow ca645_server_t ca645_server_port_t:tcp_socket name_bind;
